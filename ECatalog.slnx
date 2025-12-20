@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ECatalog.API/ECatalog.API.csproj" />
+  <Project Path="ECatalog.Application/ECatalog.Application.csproj" />
+  <Project Path="ECatalog.Domain/ECatalog.Domain.csproj" />
+  <Project Path="ECatalog.Infrastructure/ECatalog.Infrastructure.csproj" />
+</Solution>
