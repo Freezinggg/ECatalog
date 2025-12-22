@@ -1,4 +1,9 @@
 
+using ECatalog.Application.CQRS.Handler.CreateCatalogItem;
+using ECatalog.Application.Interfaces;
+using ECatalog.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
 namespace ECatalog.API
 {
     public class Program
@@ -12,6 +17,16 @@ namespace ECatalog.API
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            builder.Services.AddScoped<ICatalogItemRepository, CatalogItemRepository>();
+
+            builder.Services.AddDbContext<CatalogDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+            builder.Services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(typeof(CreateCatalogItemCommand).Assembly);
+            });
 
             var app = builder.Build();
 
