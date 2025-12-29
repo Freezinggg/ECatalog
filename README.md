@@ -26,7 +26,8 @@ This project prioritizes:
 - Project scaffolded
 - Clean Architecture (Onion) structures
 - EF Core migrations working
-- CQRS (Read side) in progress
+- CQRS done
+- Log using Serilog and Seq, Metrics using OpenTelemetry and Prometheus, Visualization dashboard using Grafana
 
 ## Why this project exists
 This project is part of a structured learning journey to move from
