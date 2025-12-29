@@ -17,10 +17,12 @@ namespace ECatalog.Application.CQRS.Handler.DeleteCatalogItem
     {
         private readonly ICatalogItemRepository _repo;
         private readonly ILogger<DeleteCatalogItemCommandHandler> _logger;
-        public DeleteCatalogItemCommandHandler(ICatalogItemRepository catalogItemRepository, ILogger<DeleteCatalogItemCommandHandler> logger)
+        private readonly IMetricRecorder _metric;
+        public DeleteCatalogItemCommandHandler(ICatalogItemRepository catalogItemRepository, ILogger<DeleteCatalogItemCommandHandler> logger, IMetricRecorder metric)
         {
             _repo = catalogItemRepository;
             _logger = logger;
+            _metric = metric;
         }
 
         public async Task<Result<bool>> Handle(DeleteCatalogItemCommand request, CancellationToken cancellationToken)
@@ -32,6 +34,7 @@ namespace ECatalog.Application.CQRS.Handler.DeleteCatalogItem
             if (item == null)
             {
                 _logger.LogWarning("Delete catalog item rejected because ItemId not found ItemId={ItemId}", request.Id);
+                _metric.OperationFailed();
                 return Result<bool>.NotFound("Catalog Item doens't exist.");
             }
 
@@ -39,12 +42,13 @@ namespace ECatalog.Application.CQRS.Handler.DeleteCatalogItem
             {
                 await _repo.DeleteAsync(item);
                 _logger.LogInformation("Catalog item deleted successfully. ItemId={ItemId}", request.Id);
-
+                _metric.ItemDeleted();
                 return Result<bool>.Success(true);
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex, "Failed to delete catalog item with ItemId={ItemId}", request.Id);
+                _metric.OperationFailed();
                 throw;
             }
         }

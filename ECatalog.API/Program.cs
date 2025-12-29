@@ -2,8 +2,10 @@
 using ECatalog.API.Middleware;
 using ECatalog.Application.CQRS.Handler.CreateCatalogItem;
 using ECatalog.Application.Interfaces;
+using ECatalog.Infrastructure.Observability;
 using ECatalog.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
 using Serilog;
 
 namespace ECatalog.API
@@ -34,6 +36,7 @@ namespace ECatalog.API
             builder.Services.AddOpenApi();
 
             builder.Services.AddScoped<ICatalogItemRepository, CatalogItemRepository>();
+            builder.Services.AddScoped<IMetricRecorder, OpenTelemetryMetricRecorder>();
 
             builder.Services.AddDbContext<CatalogDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
@@ -43,8 +46,18 @@ namespace ECatalog.API
                 cfg.RegisterServicesFromAssembly(typeof(CreateCatalogItemCommand).Assembly);
             });
 
-            var app = builder.Build();
+            builder.Services.AddOpenTelemetry()
+            .WithMetrics(metrics =>
+            {
+                metrics
+                    .AddMeter("ECatalog.Metrics")
+                    .AddAspNetCoreInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddPrometheusExporter();
+            });
 
+            var app = builder.Build();
+            
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -63,15 +76,11 @@ namespace ECatalog.API
                     diagnosticContext.Set("StatusCode", httpContext.Response.StatusCode);
                 };
             });
+            app.MapPrometheusScrapingEndpoint();
 
             app.UseAuthorization();
 
-
             app.MapControllers();
-
-
-
-
             app.Run();
         }
     }

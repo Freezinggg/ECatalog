@@ -16,11 +16,13 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
     {
         private readonly ICatalogItemRepository _repo;
         private readonly ILogger<UpdateCatalogItemCommandHandler> _logger;
+        private readonly IMetricRecorder _metric;
 
-        public UpdateCatalogItemCommandHandler(ICatalogItemRepository catalogItemRepository, ILogger<UpdateCatalogItemCommandHandler> logger)
+        public UpdateCatalogItemCommandHandler(ICatalogItemRepository catalogItemRepository, ILogger<UpdateCatalogItemCommandHandler> logger, IMetricRecorder metric)
         {
             _repo = catalogItemRepository;
             _logger = logger;
+            _metric = metric;
         }
 
         public async Task<Result<bool>> Handle(UpdateCatalogItemCommand request, CancellationToken cancellationToken)
@@ -32,6 +34,7 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
             if (item == null)
             {
                 _logger.LogWarning("Update catalog item rejected because ItemId not found ItemId={ItemId}", request.Id);
+                _metric.OperationFailed();
                 return Result<bool>.NotFound("Catalog Item doens't exist.");
             }
 
@@ -39,18 +42,21 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
             if (string.IsNullOrWhiteSpace(request.Name))
             {
                 _logger.LogWarning("Update catalog item rejected, Reason=EmptyName Name={Name}", request.Name);
+                _metric.OperationFailed();
                 return Result<bool>.Invalid("Name cannot be empty.");
             }
 
             if (string.IsNullOrWhiteSpace(request.Description))
             {
                 _logger.LogWarning("Update catalog item rejected, Reason=EmptyDescription Descsription={Description}", request.Description);
+                _metric.OperationFailed();
                 return Result<bool>.Invalid("Description cannot be empty.");
             }
 
             if (request.Price <= 0)
             {
                 _logger.LogWarning("Update catalog item rejected, Reason=PriceInvalid Price={Price}", request.Price);
+                _metric.OperationFailed();
                 return Result<bool>.Invalid("Price needs to be > 0");
             }
 
@@ -63,11 +69,13 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
             {
                 await _repo.UpdateAsync(item);
                 _logger.LogInformation("Catalog item updated successfully. ItemId={ItemId}", item.Id);
+                _metric.ItemUpdated();
                 return Result<bool>.Success(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to update catalog item with ItemId={ItemId}", item.Id);
+                _metric.OperationFailed();
                 throw;
             }
         }
