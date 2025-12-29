@@ -15,6 +15,7 @@ This project prioritizes:
 - PostgreSQL
 - MediatR
 - Clean Architecture
+- OpenTelemetry, Prometheus, Grafana
 
 ## Architecture
 - **ECatalog.Api** — API layer, controllers, DI, configuration
