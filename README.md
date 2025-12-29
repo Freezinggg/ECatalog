@@ -16,6 +16,7 @@ This project prioritizes:
 - MediatR
 - Clean Architecture
 - OpenTelemetry, Prometheus, Grafana
+- Docker (for Observability part)
 
 ## Architecture
 - **ECatalog.Api** — API layer, controllers, DI, configuration
