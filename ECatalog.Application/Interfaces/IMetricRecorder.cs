@@ -8,9 +8,16 @@ namespace ECatalog.Application.Interfaces
 {
     public interface IMetricRecorder
     {
-        void ItemCreated();
-        void ItemUpdated();
-        void ItemDeleted();
-        void OperationFailed();
+        void CreateAttempted();
+        void CreateSucceeded();
+        void CreateFailed();
+
+        void UpdateAttempted();
+        void UpdateSucceeded();
+        void UpdateFailed();
+
+        void DeleteAttempted();
+        void DeleteSucceeded();
+        void DeleteFailed();
     }
 }

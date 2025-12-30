@@ -27,26 +27,27 @@ namespace ECatalog.Application.CQRS.Handler.CreateCatalogItem
         public async Task<Result<Guid>> Handle(CreateCatalogItemCommand request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Creating catalog item with Name={Name}", request.Name);
+            _metric.CreateAttempted();
 
             //Validation here
             if (string.IsNullOrWhiteSpace(request.Name))
             {
                 _logger.LogWarning("Create catalog item rejected, Reason=EmptyName Name={Name}", request.Name);
-                _metric.OperationFailed();
+                _metric.CreateFailed();
                 return Result<Guid>.Invalid("Name cannot be empty.");
             }
             
             if (string.IsNullOrWhiteSpace(request.Description))
             {
                 _logger.LogWarning("Create catalog item rejected, Reason=EmptyDescription Descsription={Description}", request.Description);
-                _metric.OperationFailed();
+                _metric.CreateFailed();
                 return Result<Guid>.Invalid("Description cannot be empty.");
             }
 
             if (request.Price <= 0)
             {
                 _logger.LogWarning("Create catalog item rejected, Reason=PriceInvalid Price={Price}", request.Price);
-                _metric.OperationFailed();
+                _metric.CreateFailed();
                 return Result<Guid>.Invalid("Price needs to be > 0");
             }
 
@@ -63,14 +64,14 @@ namespace ECatalog.Application.CQRS.Handler.CreateCatalogItem
 
                 var result = await _repo.CreateAsync(item);
                 _logger.LogInformation("Catalog item created successfully. ItemId={ItemId}", result);
-                _metric.ItemCreated();
+                _metric.CreateSucceeded();
 
                 return Result<Guid>.Success(result);
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex,"Failed to create catalog item with Name={Name}",request.Name);
-                _metric.OperationFailed();
+                _metric.CreateFailed();
                 throw;
             }
         }

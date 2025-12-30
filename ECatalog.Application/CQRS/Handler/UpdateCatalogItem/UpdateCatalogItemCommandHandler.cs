@@ -28,13 +28,14 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
         public async Task<Result<bool>> Handle(UpdateCatalogItemCommand request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Updating catalog item ItemId={ItemId}", request.Id);
+            _metric.UpdateAttempted();
 
             //Check exist
             CatalogItem? item = await _repo.GetByIdAsync(request.Id);
             if (item == null)
             {
                 _logger.LogWarning("Update catalog item rejected because ItemId not found ItemId={ItemId}", request.Id);
-                _metric.OperationFailed();
+                _metric.UpdateFailed();
                 return Result<bool>.NotFound("Catalog Item doens't exist.");
             }
 
@@ -42,21 +43,21 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
             if (string.IsNullOrWhiteSpace(request.Name))
             {
                 _logger.LogWarning("Update catalog item rejected, Reason=EmptyName Name={Name}", request.Name);
-                _metric.OperationFailed();
+                _metric.UpdateFailed();
                 return Result<bool>.Invalid("Name cannot be empty.");
             }
 
             if (string.IsNullOrWhiteSpace(request.Description))
             {
                 _logger.LogWarning("Update catalog item rejected, Reason=EmptyDescription Descsription={Description}", request.Description);
-                _metric.OperationFailed();
+                _metric.UpdateFailed();
                 return Result<bool>.Invalid("Description cannot be empty.");
             }
 
             if (request.Price <= 0)
             {
                 _logger.LogWarning("Update catalog item rejected, Reason=PriceInvalid Price={Price}", request.Price);
-                _metric.OperationFailed();
+                _metric.UpdateFailed();
                 return Result<bool>.Invalid("Price needs to be > 0");
             }
 
@@ -69,13 +70,13 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
             {
                 await _repo.UpdateAsync(item);
                 _logger.LogInformation("Catalog item updated successfully. ItemId={ItemId}", item.Id);
-                _metric.ItemUpdated();
+                _metric.UpdateSucceeded();
                 return Result<bool>.Success(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to update catalog item with ItemId={ItemId}", item.Id);
-                _metric.OperationFailed();
+                _metric.UpdateFailed();
                 throw;
             }
         }
