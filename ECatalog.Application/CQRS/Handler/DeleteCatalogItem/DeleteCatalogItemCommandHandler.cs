@@ -27,30 +27,19 @@ namespace ECatalog.Application.CQRS.Handler.DeleteCatalogItem
 
         public async Task<Result<bool>> Handle(DeleteCatalogItemCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Deleting catalog item with ItemId={ItemId}", request.Id);
             _metric.DeleteAttempted();
+
             //Check exist
             CatalogItem? item = await _repo.GetByIdAsync(request.Id);
             if (item == null)
             {
-                _logger.LogWarning("Delete catalog item rejected because ItemId not found ItemId={ItemId}", request.Id);
                 _metric.DeleteFailed();
                 return Result<bool>.NotFound("Catalog Item doens't exist.");
             }
 
-            try
-            {
-                await _repo.DeleteAsync(item);
-                _logger.LogInformation("Catalog item deleted successfully. ItemId={ItemId}", request.Id);
-                _metric.DeleteSucceeded();
-                return Result<bool>.Success(true);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, "Failed to delete catalog item with ItemId={ItemId}", request.Id);
-                _metric.DeleteFailed();
-                throw;
-            }
+            await _repo.DeleteAsync(item);
+            _metric.DeleteSucceeded();
+            return Result<bool>.Success(true);
         }
     }
 }

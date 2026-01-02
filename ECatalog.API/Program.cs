@@ -1,9 +1,11 @@
 
 using ECatalog.API.Middleware;
+using ECatalog.Application.Common;
 using ECatalog.Application.CQRS.Handler.CreateCatalogItem;
 using ECatalog.Application.Interfaces;
 using ECatalog.Infrastructure.Observability;
 using ECatalog.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using Serilog;
@@ -45,6 +47,11 @@ namespace ECatalog.API
             {
                 cfg.RegisterServicesFromAssembly(typeof(CreateCatalogItemCommand).Assembly);
             });
+
+            builder.Services.AddTransient(
+                typeof(IPipelineBehavior<,>),
+                typeof(LoggingBehavior<,>)
+            );
 
             builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
