@@ -52,3 +52,7 @@ This project is part of a structured learning journey to move from
 
 ## Notes
 This repository is intentionally built step-by-step with clarity over speed and learning process. So expect some bugs, refactors, smells, and etc.
+
+## Status
+**Completed (v2.0.0)** — This project is architecturally complete and maintained for reference.
+
