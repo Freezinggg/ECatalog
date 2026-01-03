@@ -13,6 +13,13 @@ The goal is to demonstrate real-world backend engineering practices, not just CR
 - ECatalog.API. HTTP Layer, controllers, middlewares, DI and observability config/setup
 - ECatalog.Application. Use cases, CQRS, handlers and business flow are handled here
 - ECatalog.Infrastructure. Implementation and persistence concerns (EF Core, PostgreSQL, migrations, OTel wiring, implementation)
+- ECatalog.Web. Front-end.
+
+## Architectural Decisions & Tradeoffs
+- CQRS was chosen to improve readability, debugging, and separation of write/read concerns. (Also learning process to understand more about CQRS)
+- MediatR pipeline behaviors are used to centralize concerns such as logging and metrics.
+- Business validation failures are treated differently from system failures to avoid operational metrics.
+- Metrics are aggregated using OpenTelemetry and Prometheus counters with request labels instead of per-handler counters.
 
 ## Tech Stack
 - .NET 9
