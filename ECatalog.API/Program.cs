@@ -48,9 +48,13 @@ namespace ECatalog.API
                 cfg.RegisterServicesFromAssembly(typeof(CreateCatalogItemCommand).Assembly);
             });
 
+
             builder.Services.AddTransient(
-                typeof(IPipelineBehavior<,>),
-                typeof(LoggingBehavior<,>)
+                typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>)
+            );
+
+            builder.Services.AddTransient(
+                typeof(IPipelineBehavior<,>), typeof(MetricsBehavior<,>)
             );
 
             builder.Services.AddOpenTelemetry()

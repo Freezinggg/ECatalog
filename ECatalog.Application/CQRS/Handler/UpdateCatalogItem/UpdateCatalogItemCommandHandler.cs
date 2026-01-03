@@ -27,34 +27,15 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
 
         public async Task<Result<bool>> Handle(UpdateCatalogItemCommand request, CancellationToken cancellationToken)
         {
-            _metric.UpdateAttempted();
 
             //Check exist
             CatalogItem? item = await _repo.GetByIdAsync(request.Id);
-            if (item == null)
-            {
-                _metric.UpdateFailed();
-                return Result<bool>.NotFound("Catalog Item doens't exist.");
-            }
+            if (item == null) return Result<bool>.NotFound("Catalog Item doens't exist.");
 
             //Validation here
-            if (string.IsNullOrWhiteSpace(request.Name))
-            {
-                _metric.UpdateFailed();
-                return Result<bool>.Invalid("Name cannot be empty.");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.Description))
-            {
-                _metric.UpdateFailed();
-                return Result<bool>.Invalid("Description cannot be empty.");
-            }
-
-            if (request.Price <= 0)
-            {
-                _metric.UpdateFailed();
-                return Result<bool>.Invalid("Price needs to be > 0");
-            }
+            if (string.IsNullOrWhiteSpace(request.Name)) return Result<bool>.Invalid("Name cannot be empty.");
+            if (string.IsNullOrWhiteSpace(request.Description)) return Result<bool>.Invalid("Description cannot be empty.");
+            if (request.Price <= 0) return Result<bool>.Invalid("Price needs to be > 0");
 
             //Map
             item.Name = request.Name;
@@ -62,8 +43,6 @@ namespace ECatalog.Application.CQRS.Handler.UpdateCatalogItem
             item.Price = request.Price;
 
             await _repo.UpdateAsync(item);
-
-            _metric.UpdateSucceeded();
             return Result<bool>.Success(true);
         }
     }

@@ -26,26 +26,10 @@ namespace ECatalog.Application.CQRS.Handler.CreateCatalogItem
 
         public async Task<Result<Guid>> Handle(CreateCatalogItemCommand request, CancellationToken cancellationToken)
         {
-            _metric.CreateAttempted();
-
             //Validation here
-            if (string.IsNullOrWhiteSpace(request.Name))
-            {
-                _metric.CreateFailed();
-                return Result<Guid>.Invalid("Name cannot be empty.");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.Description))
-            {
-                _metric.CreateFailed();
-                return Result<Guid>.Invalid("Description cannot be empty.");
-            }
-
-            if (request.Price <= 0)
-            {
-                _metric.CreateFailed();
-                return Result<Guid>.Invalid("Price needs to be > 0");
-            }
+            if (string.IsNullOrWhiteSpace(request.Name)) return Result<Guid>.Invalid("Name cannot be empty.");
+            if (string.IsNullOrWhiteSpace(request.Description)) return Result<Guid>.Invalid("Description cannot be empty.");
+            if (request.Price <= 0) return Result<Guid>.Invalid("Price needs to be > 0");
 
             //Entity
             CatalogItem item = new()
@@ -57,8 +41,6 @@ namespace ECatalog.Application.CQRS.Handler.CreateCatalogItem
             };
 
             var result = await _repo.CreateAsync(item);
-            _metric.CreateSucceeded();
-
             return Result<Guid>.Success(result);
         }
     }

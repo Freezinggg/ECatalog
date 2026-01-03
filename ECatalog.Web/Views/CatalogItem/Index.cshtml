@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Catalog Items";
+}
+
+<h2>All Catalog Items</h2>
+
+<div style="margin-bottom: 20px;">
+    <button class="btn btn-success" onclick="openCreateModal()">+ Create Catalog Item</button>
+</div>
+
+<table class="table table-striped" id="catalogItemTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody id="catalogItemBody">
+        <tr>
+            <td colspan="7">Loading...</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="catalogItemModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Catalog Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" id="modalBody">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="/js/catalog.js"></script>

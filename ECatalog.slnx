@@ -3,4 +3,5 @@
   <Project Path="ECatalog.Application/ECatalog.Application.csproj" />
   <Project Path="ECatalog.Domain/ECatalog.Domain.csproj" />
   <Project Path="ECatalog.Infrastructure/ECatalog.Infrastructure.csproj" />
+  <Project Path="ECatalog.Web/ECatalog.Web.csproj" Id="6db4d0a8-6ffa-4a4e-af9c-f4c2d5490241" />
 </Solution>

@@ -12,55 +12,49 @@ namespace ECatalog.Infrastructure.Observability
     {
         private static readonly Meter Meter = new("ECatalog.Metrics");
 
-        // Attempts Counter (every handler hit)
-        public static readonly Counter<long> CreateAttempt =
-            Meter.CreateCounter<long>("catalog_create_attempt_total");
+        private static readonly Counter<long> RequestStartedCounter =
+            Meter.CreateCounter<long>("mediatr_request_started_total");
 
-        public static readonly Counter<long> UpdateAttempt =
-            Meter.CreateCounter<long>("catalog_update_attempt_total");
+        private static readonly Counter<long> RequestSucceededCounter =
+            Meter.CreateCounter<long>("mediatr_request_succeeded_total");
 
-        public static readonly Counter<long> DeleteAttempt =
-            Meter.CreateCounter<long>("catalog_delete_attempt_total");
+        private static readonly Counter<long> RequestInvalidCounter =
+            Meter.CreateCounter<long>("mediatr_request_invalid_total");
 
-        // Success Counter
-        public static readonly Counter<long> CreateSuccess =
-            Meter.CreateCounter<long>("catalog_create_success_total");
+        private static readonly Counter<long> RequestFailedCounter =
+            Meter.CreateCounter<long>("mediatr_request_failed_total");
 
-        public static readonly Counter<long> UpdateSuccess =
-            Meter.CreateCounter<long>("catalog_update_success_total");
+        private static readonly Histogram<long> RequestDurationMs =
+            Meter.CreateHistogram<long>("mediatr_request_duration_ms", "ms");
 
-        public static readonly Counter<long> DeleteSuccess =
-            Meter.CreateCounter<long>("catalog_delete_success_total");
+        public void RequestStarted(string requestName)
+        {
+            RequestStartedCounter.Add(1,
+                new KeyValuePair<string, object?>("request", requestName));
+        }
 
-        // Failure Counter
-        public static readonly Counter<long> CreateFailure =
-            Meter.CreateCounter<long>("catalog_create_failure_total");
+        public void RequestSucceeded(string requestName)
+        {
+            RequestSucceededCounter.Add(1,
+                new KeyValuePair<string, object?>("request", requestName));
+        }
 
-        public static readonly Counter<long> UpdateFailure =
-            Meter.CreateCounter<long>("catalog_update_failure_total");
+        public void RequestInvalid(string requestName)
+        {
+            RequestInvalidCounter.Add(1,
+                new KeyValuePair<string, object?>("request", requestName));
+        }
 
-        public static readonly Counter<long> DeleteFailure =
-            Meter.CreateCounter<long>("catalog_delete_failure_total");
+        public void RequestFailed(string requestName)
+        {
+            RequestFailedCounter.Add(1,
+                new KeyValuePair<string, object?>("request", requestName));
+        }
 
-        
-        //Will use this soon?
-        public static readonly Histogram<long> HandlerDurationMs =
-            Meter.CreateHistogram<long>("catalog_handler_duration_ms", "ms");
-
-        
-        public void CreateAttempted() => CreateAttempt.Add(1);
-        public void CreateSucceeded() => CreateSuccess.Add(1);
-        public void CreateFailed() => CreateFailure.Add(1);
-
-        public void UpdateAttempted() => UpdateAttempt.Add(1);
-        public void UpdateSucceeded() => UpdateSuccess.Add(1);
-        public void UpdateFailed() => UpdateFailure.Add(1);
-
-        public void DeleteAttempted() => DeleteAttempt.Add(1);
-        public void DeleteSucceeded() => DeleteSuccess.Add(1);
-        public void DeleteFailed() => DeleteFailure.Add(1);
-
-        public void RecordDuration(long milliseconds) =>
-            HandlerDurationMs.Record(milliseconds);
+        public void RecordDuration(string requestName, long milliseconds)
+        {
+            RequestDurationMs.Record(milliseconds,
+                new KeyValuePair<string, object?>("request", requestName));
+        }
     }
 }
